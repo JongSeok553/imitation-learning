@@ -5,13 +5,12 @@ import importlib
 import logging
 import os
 import shutil
-
+import models.conditional_il_model as mci
 import tensorflow as tf
-
+import input_fn
 from common.train import inputs
 from common.util import file_util, tf_flags_util
 import constants as ilc
-import input_fn
 from evaluation import EvalHook, get_eval_metrics
 
 logging.basicConfig(level=logging.INFO)
@@ -40,7 +39,7 @@ flags.DEFINE_float('lambda_steer', default=8.571, help='Weight in loss for steer
 flags.DEFINE_float('lambda_brake', default=1., help='Weight in loss for brake.')
 flags.DEFINE_float('lambda_speed', default=1., help='Weight in loss for speed.')
 
-flags.DEFINE_string('output_dir', default='/data/imitation_learning/experiments/local_test',
+flags.DEFINE_string('output_dir', default='home/ljs/imitation-learning/imitation/data/imitation_learning/experiments/4proposed_test',
                     help='Output directory used to store train and eval output.')
 flags.DEFINE_string('train_path', default='/data/imitation_learning/preprocessed/TRAIN*.tfrecord.gz',
                     help='List of paths containing the training data to use, as '
@@ -83,16 +82,18 @@ flags.DEFINE_float('adam_beta2', default=0.85,
 
 tf_flags_util.overwrite_tf_flags_with_config(FLAGS, FLAGS.config_paths)
 
-
+# _module = importlib.import_module('models/conditional_il_model.py')# 'models.{}'.format(FLAGS.model_type)
 _module = importlib.import_module('models.{}'.format(FLAGS.model_type))
 try:
     model = _module.model
+    print("load model")
 except AttributeError:
     logging.error("Module {} must contain a function called model()".format(str(_module)))
     raise
 
 
 def train_input_fn():
+    
     train_files = inputs.get_tfrecord_paths(FLAGS.train_path)
     return input_fn.train_input_fn(
         tfrecord_fpaths=train_files,
@@ -190,7 +191,7 @@ class ImitationLearningTrainer(object):
 
     def execute(self):
         """Runs trainer module locally, based on config params"""
-        file_util.create_directory(FLAGS.output_dir)
+        file_util.create_directory(os.getcwd()+FLAGS.output_dir)
         self.train()
 
     def deploy(self):
@@ -199,9 +200,9 @@ class ImitationLearningTrainer(object):
 
     def train(self):
         """Runs training based on mparam config"""
-        if os.path.isdir(FLAGS.output_dir):
+        if os.path.isdir(os.getcwd()+FLAGS.output_dir):
             logging.info("Deleting existing dir {}".format(FLAGS.output_dir))
-            shutil.rmtree(FLAGS.output_dir)
+            shutil.rmtree(os.getcwd()+FLAGS.output_dir)
 
         logging.info("Running train")
         self.estimator.train(

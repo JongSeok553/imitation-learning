@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 import tensorflow as tf
 
 import constants as ilc
-from models.imitation_learning_network import load_imitation_learning_network
+# from models.imitation_learning_network import load_imitation_learning_network
+import imitation_learning_network
 
 
 def model(features, labels, mode, loss_weights):
@@ -37,7 +38,7 @@ def model(features, labels, mode, loss_weights):
 
     # Note: this is reverse engineered to work with the imitation-learning network
     speed_pair = [None, tf.reshape(features[ilc.TGT_SPEED], shape=(batch_size, 1))]
-    branches = load_imitation_learning_network(image, speed_pair, mode)  # type: List[tf.Tensor]
+    branches = imitation_learning_network.load_imitation_learning_network(image, speed_pair, mode)  # type: List[tf.Tensor]
 
     # The last branch is speed, we want to exclude this
     pred_all_branches = tf.stack(branches[:4], axis=1)  # shape: (?, 4, 3)
@@ -87,7 +88,6 @@ def model(features, labels, mode, loss_weights):
             ilc.TGT_BRAKE: selected_pred_tensor[:, 2],
             ilc.TGT_SPEED: predictions[ilc.OUTPUT_BRANCH_SPEED],
         }
-
         return total_loss, selected_pred, predictions
 
     elif mode == tf.estimator.ModeKeys.PREDICT:

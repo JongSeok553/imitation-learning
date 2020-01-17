@@ -65,6 +65,7 @@ def get_files(subdir, data_dir, num_files=None):
         list of h5 files to preprocess
     """
     h5_dir = os.path.join(data_dir, subdir)
+    h5_dir = os.getcwd() + h5_dir
     assert os.path.isdir(h5_dir), 'No directory {}'.format(h5_dir)
 
     h5_glob = os.path.join(h5_dir, '*.h5')
@@ -180,7 +181,7 @@ def run_pipeline():
 
             output_filename = '{}-{:05d}.tfrecord.gz'.format(label, index / BATCHSIZE)
             output_filepath = os.path.join(FLAGS.preproc_output_dir, output_filename)
-
+            output_filepath = os.getcwd() + output_filepath
             upper_index = min(index + BATCHSIZE, len(h5_files))
             some_h5_files = h5_files[index:upper_index]
 

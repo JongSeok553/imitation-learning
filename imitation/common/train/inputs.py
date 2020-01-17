@@ -79,7 +79,7 @@ def get_tfrecord_paths(globs):
     paths = []
     for glob_ in globs:
         paths.extend(glob(glob_))
-
+  
     assert len(paths) > 0, 'No tfrecords found for glob(s) {}'.format(globs)
     assert len(paths) == len(set(paths)), 'Globs resulted in non-unique set of paths.\nGlobs: {}\nPaths: {}'.format(
         globs, paths)
